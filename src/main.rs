@@ -2,14 +2,14 @@ mod browse;
 mod files;
 mod pathutil;
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 use clap::Parser;
 use std::path::PathBuf;
 
 /// A small read-only HTTP server that exposes a local music directory:
 /// browse its structure and stream the files it contains.
 #[derive(Parser, Debug)]
-#[command(name = "audioindexer-backend", version, about)]
+#[command(name = "music-server", version, about)]
 struct Cli {
     /// Root directory containing the music files to serve.
     #[arg(short, long)]
@@ -57,6 +57,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::new("%a \"%r\" %s %b bytes in %Dms"))
             .app_data(state.clone())
             .app_data(web::PathConfig::default())
             .service(

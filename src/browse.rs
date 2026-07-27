@@ -102,6 +102,8 @@ pub async fn browse_subpath(
 }
 
 fn browse_path_impl(data: &web::Data<AppState>, rel: &str) -> HttpResponse {
+    log::info!("browse request: /{rel}");
+
     let resolved = if rel.is_empty() {
         // Root is always valid (and already canonical) since we built the
         // server state from it.

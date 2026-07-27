@@ -6,8 +6,8 @@ use crate::AppState;
 
 /// GET /api/files/{path:.*}
 ///
-/// Serves the raw contents of a file. Any filetype is allowed;
-/// this endpoint just streams whatever bytes are found there.
+/// Serves the raw contents of a file inside the music root. Any filetype is
+/// allowed; this endpoint just streams whatever bytes are found there.
 ///
 /// Uses `actix_files::NamedFile`, which handles `Range` requests, conditional
 /// GETs (`If-Modified-Since`/`ETag`), and correct `Content-Type` guessing via
@@ -19,6 +19,11 @@ pub async fn get_file(
     path: web::Path<String>,
 ) -> impl Responder {
     let rel = path.into_inner();
+
+    match req.headers().get(actix_web::http::header::RANGE) {
+        Some(range) => log::info!("file request: /{rel} (range: {range:?})"),
+        None => log::info!("file request: /{rel}"),
+    }
 
     let resolved = match resolve_within_root(&data.root, &rel) {
         Ok(p) => p,
